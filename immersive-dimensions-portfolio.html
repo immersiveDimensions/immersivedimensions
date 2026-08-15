@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mixed reality, spatial localization, multiplayer, and robotics prototypes by Immersive Dimensions.">
+  <title>Immersive Dimensions</title>
+
+  <!--
+    HOW TO ADD YOUR VIDEOS
+    Find each element with class="video-shell" below and paste a YouTube or
+    Vimeo EMBED URL into its data-video-url value.
+
+    YouTube example:
+    data-video-url="https://www.youtube-nocookie.com/embed/YOUR_VIDEO_ID"
+
+    Vimeo example:
+    data-video-url="https://player.vimeo.com/video/YOUR_VIDEO_ID"
+
+    This entire site is self-contained in this one file. You can upload it as
+    index.html to GitHub Pages, Cloudflare Pages, Netlify, or nearly any host.
+  -->
+
+  <style>
+    :root {
+      --ink: #101826;
+      --muted: #5d6979;
+      --line: #dfe5ec;
+      --blue: #0d54ad;
+      --blue-dark: #093a78;
+      --blue-light: #e8f2ff;
+      --paper: #f7f9fc;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--white);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, a { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    .site-header {
+      min-height: 76px;
+      padding: 0 clamp(24px, 5vw, 80px);
+      border-bottom: 1px solid rgba(16, 24, 38, 0.1);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    .brand { display: flex; align-items: center; gap: 13px; font-weight: 720; letter-spacing: -0.025em; }
+    .cube-mark { width: 38px; height: 38px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; transform: rotate(30deg); }
+    .cube-mark i { background: #8c9cad; border-radius: 1px; }
+    .cube-mark i:nth-child(1), .cube-mark i:nth-child(4) { background: #0b477f; }
+    .cube-mark i:nth-child(2), .cube-mark i:nth-child(5) { background: #1b659f; }
+    .cube-mark i:nth-child(3) { background: #263c50; }
+    nav { display: flex; align-items: center; gap: clamp(20px, 3vw, 42px); font-size: 14px; }
+    nav a { position: relative; padding: 28px 0; }
+    nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: 19px; height: 2px; background: var(--blue); transition: right 180ms ease; }
+    nav a:hover::after, nav a:focus-visible::after { right: 0; }
+
+    .hero {
+      min-height: 650px;
+      padding: clamp(70px, 9vw, 130px) clamp(24px, 6vw, 96px);
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(440px, 1.1fr);
+      gap: clamp(54px, 7vw, 110px);
+      align-items: center;
+      overflow: hidden;
+      background: radial-gradient(circle at 78% 36%, #eef5ff 0, transparent 27%), linear-gradient(115deg, #fff 45%, #f6f8fb 100%);
+    }
+    .hero-copy { max-width: 630px; }
+    .eyebrow { margin: 0 0 21px; color: var(--blue); font-size: 12px; font-weight: 760; letter-spacing: 0.16em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+    .eyebrow::before { content: ""; width: 22px; height: 2px; background: currentColor; }
+    h1 { margin: 0; font-size: clamp(48px, 5.6vw, 82px); line-height: 0.98; letter-spacing: -0.056em; font-weight: 690; }
+    .hero-description { margin: 30px 0 0; max-width: 580px; color: var(--muted); font-size: clamp(17px, 1.45vw, 21px); line-height: 1.65; }
+    .hero-actions { margin-top: 37px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .button { min-height: 51px; padding: 0 21px; border: 1px solid var(--blue); border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; gap: 28px; font-size: 14px; font-weight: 700; transition: transform 180ms ease, background 180ms ease; }
+    .button:hover { transform: translateY(-2px); }
+    .button-primary { background: var(--blue); color: white; box-shadow: 0 11px 30px rgba(13, 84, 173, 0.2); }
+    .button-primary:hover { background: var(--blue-dark); }
+    .button-secondary { color: var(--blue); }
+    .button-secondary:hover { background: var(--blue-light); }
+    .platforms { display: flex; flex-wrap: wrap; gap: 8px 23px; margin-top: 40px; color: #778393; font-size: 12px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
+
+    .spatial-visual {
+      min-height: 470px;
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at 58% 50%, rgba(26, 112, 199, 0.42), transparent 8%), linear-gradient(135deg, #0a1420, #102d48 52%, #07111c);
+      box-shadow: 0 30px 80px rgba(13, 40, 69, 0.24);
+    }
+    .grid-plane { position: absolute; inset: 0; background-image: linear-gradient(rgba(90, 180, 255, 0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(90, 180, 255, 0.13) 1px, transparent 1px); background-size: 38px 38px; transform: perspective(420px) rotateX(57deg) scale(1.45); transform-origin: center 80%; }
+    .scan-box { position: absolute; inset: 14% 12% 18%; border: 1px solid rgba(108, 194, 255, 0.35); clip-path: polygon(15% 5%, 92% 0, 100% 79%, 63% 100%, 0 82%, 0 22%); background: rgba(64, 159, 232, 0.08); }
+    .orb { position: absolute; left: 50%; top: 50%; width: 96px; height: 96px; transform: translate(-50%, -50%); border: 1px solid rgba(122, 209, 255, 0.75); border-radius: 50%; box-shadow: 0 0 0 13px rgba(49, 152, 224, 0.11), 0 0 55px rgba(60, 181, 255, 0.35); }
+    .orb::before, .orb::after { content: ""; position: absolute; background: rgba(139, 217, 255, 0.65); }
+    .orb::before { width: 140%; height: 1px; left: -20%; top: 50%; }
+    .orb::after { height: 140%; width: 1px; top: -20%; left: 50%; }
+    .orb i { position: absolute; inset: 38%; border-radius: 50%; background: #7bd1ff; box-shadow: 0 0 24px #46b2ff; }
+    .spatial-label { position: absolute; padding: 8px 11px; border: 1px solid rgba(126, 202, 255, 0.45); border-radius: 4px; color: #d9efff; background: rgba(6, 35, 61, 0.82); font-size: 11px; font-weight: 650; }
+    .spatial-label::before { content: ""; display: inline-block; width: 5px; height: 5px; margin-right: 7px; border-radius: 50%; background: #5fc1ff; box-shadow: 0 0 9px #5fc1ff; }
+    .label-one { left: 8%; top: 22%; } .label-two { right: 8%; top: 14%; } .label-three { right: 14%; bottom: 24%; }
+    .visual-caption { position: absolute; left: 24px; bottom: 19px; margin: 0; color: rgba(210, 234, 250, .65); font-size: 10px; font-weight: 700; letter-spacing: .15em; }
+
+    .section { padding: 96px clamp(24px, 5vw, 80px) 108px; }
+    .capabilities { background: var(--paper); border-top: 1px solid var(--line); }
+    .section-heading { margin: 0 auto 42px; max-width: 720px; text-align: center; }
+    .section-heading .eyebrow { justify-content: center; margin-bottom: 16px; }
+    .section-heading h2 { margin: 0; font-size: clamp(38px, 4vw, 56px); letter-spacing: -0.045em; }
+    .section-heading > p:last-child { margin: 14px 0 0; color: var(--muted); }
+
+    .capability-grid { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .capability-button { min-height: 274px; padding: 24px 22px 21px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); text-align: left; cursor: pointer; display: flex; flex-direction: column; transition: 180ms ease; }
+    .capability-button:hover { transform: translateY(-4px); border-color: #b7c9dd; box-shadow: 0 15px 40px rgba(28, 53, 82, .09); }
+    .capability-button.active { border-color: var(--blue); background: linear-gradient(155deg, #fff, #edf5ff); box-shadow: inset 0 -3px 0 var(--blue), 0 15px 38px rgba(13, 84, 173, .12); }
+    .number { color: var(--blue); font-size: 11px; font-weight: 800; letter-spacing: .14em; }
+    .capability-button strong { margin-top: 29px; min-height: 58px; font-size: 18px; line-height: 1.35; letter-spacing: -.02em; }
+    .capability-button small { margin-top: 11px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .card-action { margin-top: auto; padding-top: 22px; color: var(--blue); font-size: 12px; font-weight: 750; display: flex; justify-content: space-between; }
+    .card-action b { font-size: 18px; font-weight: 500; }
+
+    .capability-panel { max-width: 1440px; min-height: 420px; margin: 18px auto 0; border: 1px solid #cfdbe7; border-radius: 10px; background: white; display: none; grid-template-columns: minmax(340px, .9fr) minmax(440px, 1.1fr); overflow: hidden; box-shadow: 0 20px 55px rgba(29, 55, 83, .10); }
+    .capability-panel.active { display: grid; animation: panel-in 240ms cubic-bezier(.2,.75,.25,1) both; }
+    @keyframes panel-in { from { opacity: 0; transform: translateY(-9px); } to { opacity: 1; transform: translateY(0); } }
+    .panel-copy { padding: clamp(36px, 5vw, 72px); align-self: center; }
+    .panel-copy .number { display: block; margin-bottom: 18px; }
+    .panel-copy h3 { margin: 0; font-size: clamp(28px, 3vw, 43px); line-height: 1.06; letter-spacing: -.045em; }
+    .panel-copy > p { margin: 22px 0 0; color: var(--muted); font-size: 16px; line-height: 1.7; }
+    .tags { margin: 28px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; list-style: none; }
+    .tags li { padding: 7px 11px; border: 1px solid #cfdae6; border-radius: 999px; color: #405166; background: #f8fafc; font-size: 11px; font-weight: 700; }
+    .video-shell { min-height: 384px; margin: 18px; border-radius: 7px; overflow: hidden; background: #081727; }
+    .video-shell iframe { width: 100%; height: 100%; min-height: 384px; border: 0; }
+    .video-placeholder { width: 100%; min-height: 384px; position: relative; overflow: hidden; color: white; background: radial-gradient(circle at 50% 45%, rgba(44, 147, 224, .55), transparent 10%), linear-gradient(145deg, #091723, #173d5f); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .video-placeholder::before { content: ""; position: absolute; inset: 0; opacity: .45; background-image: linear-gradient(rgba(90,180,255,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(90,180,255,.13) 1px, transparent 1px); background-size: 38px 38px; transform: perspective(420px) rotateX(57deg) scale(1.45); }
+    .play { width: 68px; height: 68px; padding-left: 4px; border: 1px solid rgba(255,255,255,.85); border-radius: 50%; background: rgba(4, 19, 34, .35); display: grid; place-items: center; position: relative; z-index: 2; }
+    .video-placeholder p { position: relative; z-index: 2; margin: 18px 0 4px; font-size: 14px; font-weight: 720; }
+    .video-placeholder small { position: relative; z-index: 2; max-width: 320px; color: rgba(222,239,251,.65); line-height: 1.5; }
+
+    .work { background: white; }
+    .project-list { max-width: 1440px; margin: 0 auto; display: grid; gap: 18px; }
+    .game-feature { min-height: 520px; border: 1px solid #243448; border-radius: 10px; overflow: hidden; color: white; background: #08121f; display: grid; grid-template-columns: 1.08fr .92fr; box-shadow: 0 25px 70px rgba(12,31,53,.2); }
+    .game-art { min-height: 520px; position: relative; overflow: hidden; background: radial-gradient(circle at 50% 48%, rgba(27,130,207,.32), transparent 10%), linear-gradient(145deg,#0a1e31,#07111d 72%); }
+    .game-art::before { content:""; position:absolute; inset:0; background-image:linear-gradient(rgba(87,174,232,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(87,174,232,.1) 1px,transparent 1px); background-size:39px 39px; transform:perspective(600px) rotateX(56deg) scale(1.45); transform-origin:center bottom; }
+    .time-ring { position:absolute; left:50%; top:48%; width:260px; height:260px; transform:translate(-50%,-50%); border:1px dashed rgba(100,199,255,.65); border-radius:50%; box-shadow:0 0 0 52px rgba(69,168,225,.035),0 0 0 104px rgba(69,168,225,.025),0 0 40px rgba(48,166,235,.2); }
+    .time-ring::before { content:""; position:absolute; inset:55px; border:1px solid rgba(120,210,255,.7); border-radius:50%; }
+    .game-monogram { position:absolute; left:50%; top:48%; transform:translate(-50%,-50%); color:#d8f1ff; font-size:48px; font-weight:780; letter-spacing:-.08em; text-shadow:0 0 28px #4cbfff; }
+    .game-art > p { position:absolute; left:0; right:0; bottom:31px; color:rgba(189,222,243,.64); text-align:center; font-size:10px; font-weight:750; letter-spacing:.18em; }
+    .game-copy { padding:clamp(48px,6vw,86px); align-self:center; }
+    .development-badge { display:inline-block; margin-bottom:25px; padding:7px 11px; border:1px solid rgba(103,196,251,.4); border-radius:999px; color:#a9dcfb; background:rgba(56,151,211,.08); font-size:10px; font-weight:780; letter-spacing:.12em; text-transform:uppercase; }
+    .game-copy .project-tag { color:#7bcaff; }
+    .game-copy h3 { margin:0; font-size:clamp(42px,5vw,69px); line-height:.98; letter-spacing:-.055em; }
+    .game-copy > p:last-of-type { margin:25px 0 0; color:#bdcad8; font-size:16px; line-height:1.72; }
+    .game-copy ul { margin:28px 0 0; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:8px; }
+    .game-copy li { padding:7px 11px; border:1px solid #30465c; border-radius:999px; color:#aebdca; background:#0d1d2c; font-size:11px; font-weight:700; }
+    .coming-note { margin-top:38px; padding-top:22px; border-top:1px solid #26394c; color:#83cefb; font-size:12px; font-weight:750; letter-spacing:.1em; text-transform:uppercase; }
+    .project { min-height: 440px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: grid; grid-template-columns: 1.15fr .85fr; background: white; box-shadow: 0 15px 50px rgba(31, 51, 75, .07); }
+    .project.reverse { grid-template-columns: .85fr 1.15fr; }
+    .project-copy { padding: clamp(42px, 5vw, 76px); align-self: center; }
+    .project-tag { margin: 0 0 18px; color: var(--blue); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .project-copy h3 { margin: 0; font-size: clamp(30px, 3.2vw, 47px); line-height: 1.07; letter-spacing: -.045em; }
+    .project-copy > p:last-of-type { margin: 21px 0 0; color: var(--muted); font-size: 16px; line-height: 1.7; }
+    .project-art { min-height: 440px; position: relative; overflow: hidden; background: radial-gradient(circle at 48% 52%, #31566d, #132b3f 30%, #08131f 72%); }
+    .project-art::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(76,153,213,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(76,153,213,.12) 1px, transparent 1px); background-size: 42px 42px; }
+    .project-object { position: absolute; z-index: 2; width: 52%; height: 40%; left: 24%; top: 30%; border: 1px solid rgba(126,196,237,.45); border-radius: 24% 16% 22%; background: linear-gradient(145deg, rgba(67,104,126,.65), rgba(13,31,45,.94)); box-shadow: inset 0 0 0 18px rgba(0,0,0,.2), 0 20px 50px rgba(0,0,0,.35); }
+    .project-object::before, .project-object::after { content: ""; position: absolute; left: 19%; right: 19%; height: 15px; border-radius: 999px; background: #0a1720; }
+    .project-object::before { top: 30%; } .project-object::after { top: 61%; }
+    .pin { position: absolute; z-index: 3; padding: 7px 10px; border: 1px solid rgba(123,192,240,.44); border-radius: 4px; color: #e2f3ff; background: rgba(10,45,73,.88); font-size: 11px; }
+    .pin-a { left: 8%; top: 20%; } .pin-b { right: 8%; top: 14%; } .pin-c { left: 42%; bottom: 12%; }
+    .rover-art { background: radial-gradient(circle at 35% 72%, rgba(20,141,224,.35), transparent 18%), linear-gradient(145deg, #11273a, #07131f); }
+    .rover { position: absolute; z-index: 3; left: 39%; bottom: 24%; width: 180px; height: 82px; border-radius: 15px 25px 10px 10px; background: linear-gradient(160deg, #257fbb, #0d3452 60%, #061724); box-shadow: 0 23px 17px rgba(0,0,0,.45); }
+    .rover::before, .rover::after { content: ""; position: absolute; bottom: -19px; width: 50px; height: 50px; border: 7px solid #18222c; border-radius: 50%; background: radial-gradient(circle, #597181 12%, #17232d 13%, #0c1117 55%); }
+    .rover::before { left: 7px; } .rover::after { right: 7px; }
+    .route { position: absolute; z-index: 2; left: -8%; right: 8%; bottom: 8%; height: 42%; border: 6px solid transparent; border-top-color: #4cbcff; border-radius: 50%; transform: rotate(-8deg); filter: drop-shadow(0 0 8px #2d9ede); }
+
+    .apps { padding:100px clamp(24px,7vw,112px) 112px; border-top:1px solid var(--line); background:#f5f7fa; }
+    .apps-heading { max-width:1440px; margin:0 auto 46px; display:grid; grid-template-columns:1fr .85fr; gap:clamp(40px,8vw,120px); align-items:end; }
+    .apps-heading h2 { margin:0; font-size:clamp(38px,4.5vw,61px); letter-spacing:-.05em; }
+    .apps-heading > p { margin:0; color:var(--muted); font-size:16px; line-height:1.7; }
+    .app-grid { max-width:1440px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .app-card { min-height:320px; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:white; display:grid; grid-template-columns:.72fr 1.28fr; box-shadow:0 13px 38px rgba(31,51,75,.06); }
+    .app-icon { min-height:320px; display:grid; place-items:center; color:#d4f0ff; background:radial-gradient(circle,rgba(61,168,232,.34),transparent 20%),linear-gradient(145deg,#173c5a,#081725); font-size:58px; }
+    .app-icon.archived { color:#627385; background:repeating-linear-gradient(135deg,#e7ebef 0,#e7ebef 1px,#f5f7f9 1px,#f5f7f9 16px); }
+    .app-copy { padding:39px; align-self:center; }
+    .status { display:inline-block; margin-bottom:21px; padding:6px 9px; border-radius:4px; color:#0b6a47; background:#e6f7ef; font-size:9px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+    .status.discontinued { color:#66717d; background:#eceff2; }
+    .app-copy h3 { margin:0; font-size:clamp(27px,2.6vw,38px); letter-spacing:-.04em; }
+    .app-copy > p:last-of-type { color:var(--muted); font-size:14px; line-height:1.65; }
+    .app-copy ul { margin:22px 0 0; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:7px; }
+    .app-copy li { padding:6px 9px; border:1px solid #d8e0e8; border-radius:999px; color:#59697a; font-size:10px; font-weight:700; }
+    .about { padding: 110px clamp(24px, 9vw, 145px); background: #f3f6fa; display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(50px, 10vw, 170px); align-items: center; }
+    .about h2 { margin: 0; font-size: clamp(40px, 5vw, 66px); line-height: 1.04; letter-spacing: -.05em; }
+    .about-copy { border-left: 1px solid #c9d5e1; padding-left: clamp(30px, 5vw, 76px); color: var(--muted); font-size: 17px; line-height: 1.75; }
+    .contact { margin: 28px clamp(24px, 5vw, 80px); padding: clamp(40px, 5vw, 72px); border-radius: 10px; color: white; background: linear-gradient(120deg, #062d58, #0a4d91 63%, #0a3767); display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+    .contact h2 { margin: 0; font-size: clamp(32px, 4vw, 51px); letter-spacing: -.04em; }
+    .contact p { color: #c9e0f3; }
+    .contact .button { border-color: rgba(255,255,255,.75); color: white; min-width: 168px; }
+    footer { padding: 46px clamp(24px, 5vw, 80px); border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 30px; color: #687788; font-size: 12px; }
+
+    @media (max-width: 1100px) {
+      .hero { grid-template-columns: 1fr; }
+      .capability-grid { grid-template-columns: repeat(3, 1fr); }
+      .capability-panel, .project, .project.reverse, .game-feature { grid-template-columns: 1fr; }
+      .project.reverse .project-copy { order: 2; }
+      .apps-heading, .app-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width: 720px) {
+      .site-header { min-height: 68px; }
+      .cube-mark { width: 31px; height: 31px; }
+      nav a:not(:last-child) { display: none; }
+      nav a:last-child { padding: 10px 13px; border: 1px solid var(--blue); border-radius: 4px; color: var(--blue); }
+      .hero { padding-top: 65px; grid-template-columns: 1fr; }
+      h1 { font-size: clamp(44px, 13vw, 65px); }
+      .spatial-visual { min-height: 390px; }
+      .capability-grid { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 18px; }
+      .capability-button { flex: 0 0 78vw; scroll-snap-align: center; }
+      .capability-panel.active { grid-template-columns: 1fr; }
+      .panel-copy, .project-copy { padding: 38px 25px; }
+      .video-shell { margin: 0 12px 12px; }
+      .project-art { min-height: 340px; }
+      .game-art { min-height:380px; }
+      .game-copy { padding:42px 25px; }
+      .app-card { grid-template-columns:1fr; }
+      .app-icon { min-height:220px; }
+      .app-copy { padding:35px 25px; }
+      .about { grid-template-columns: 1fr; padding-top: 85px; padding-bottom: 85px; }
+      .about-copy { border-left: 0; border-top: 1px solid #c9d5e1; padding: 31px 0 0; }
+      .contact, footer { align-items: flex-start; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Immersive Dimensions home">
+      <span class="cube-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <span>Immersive Dimensions</span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="#work">Work</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#about">About</a>
+      <!-- Replace the email address below with your preferred contact email. -->
+      <a href="mailto:hello@immersivedimensions.com">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow">Mixed reality studio</p>
+        <h1>Spatial Computing &amp; Immersive Experiences</h1>
+        <p class="hero-description">Mixed reality, spatial localization, multiplayer, and robotics prototypes that connect digital content with real-world environments.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#work">Explore Projects <span>→</span></a>
+          <a class="button button-secondary" href="mailto:hello@immersivedimensions.com">Discuss a Project <span>↗</span></a>
+        </div>
+        <div class="platforms"><span>Unity</span><span>Vision Pro</span><span>Meta Quest</span><span>iOS</span></div>
+      </div>
+      <div class="spatial-visual" role="img" aria-label="Stylized spatial computing visualization">
+        <div class="grid-plane"></div><div class="scan-box"></div><div class="orb"><i></i></div>
+        <span class="spatial-label label-one">Spatial anchor</span>
+        <span class="spatial-label label-two">Shared origin</span>
+        <span class="spatial-label label-three">Live tracking</span>
+        <p class="visual-caption">REAL-WORLD SPACE · DIGITALLY ALIGNED</p>
+      </div>
+    </section>
+
+    <section class="section capabilities" id="capabilities">
+      <div class="section-heading">
+        <p class="eyebrow">What I build</p>
+        <h2>Capabilities</h2>
+        <p>Select a capability to see how it works.</p>
+      </div>
+
+      <div class="capability-grid" role="list">
+        <button class="capability-button active" type="button" role="listitem" data-panel="panel-object" aria-expanded="true" aria-controls="panel-object">
+          <span class="number">01</span><strong>Object Detection &amp; Tracking</strong><small>Align digital content with real-world objects in real time.</small><span class="card-action">Close <b>−</b></span>
+        </button>
+        <button class="capability-button" type="button" role="listitem" data-panel="panel-scanning" aria-expanded="false" aria-controls="panel-scanning">
+          <span class="number">02</span><strong>Spatial Scanning &amp; Localization</strong><small>Build spatial maps and return content to precise locations.</small><span class="card-action">Explore <b>+</b></span>
+        </button>
+        <button class="capability-button" type="button" role="listitem" data-panel="panel-shared" aria-expanded="false" aria-controls="panel-shared">
+          <span class="number">03</span><strong>Shared Spatial Experiences</strong><small>Create persistent, multi-user experiences in one space.</small><span class="card-action">Explore <b>+</b></span>
+        </button>
+        <button class="capability-button" type="button" role="listitem" data-panel="panel-robotics" aria-expanded="false" aria-controls="panel-robotics">
+          <span class="number">04</span><strong>Spatial Robotics &amp; Navigation</strong><small>Enable devices to perceive, plan, and navigate intelligent paths.</small><span class="card-action">Explore <b>+</b></span>
+        </button>
+        <button class="capability-button" type="button" role="listitem" data-panel="panel-development" aria-expanded="false" aria-controls="panel-development">
+          <span class="number">05</span><strong>Immersive Application Development</strong><small>Design mixed-reality apps around specific goals.</small><span class="card-action">Explore <b>+</b></span>
+        </button>
+      </div>
+
+      <article class="capability-panel active" id="panel-object">
+        <div class="panel-copy"><span class="number">CAPABILITY 01</span><h3>Object Detection &amp; Tracking</h3><p>Recognize physical objects and maintain a stable digital overlay as the viewer moves around them. This engine-bay prototype identifies important components and places useful information exactly where it is needed.</p><ul class="tags"><li>Unity + AR Foundation</li><li>Object-relative anchors</li><li>iOS and Meta Quest</li></ul></div>
+        <div class="video-shell" data-video-url=""><div class="video-placeholder"><span class="play">▶</span><p>Video ready for your embed URL</p><small>Paste the embed URL into this panel's data-video-url value.</small></div></div>
+      </article>
+
+      <article class="capability-panel" id="panel-scanning" hidden>
+        <div class="panel-copy"><span class="number">CAPABILITY 02</span><h3>Spatial Scanning &amp; Localization</h3><p>Capture real environments as spatial data, then use visual positioning to localize a device inside that shared coordinate system. Digital content can reappear in the same physical location across sessions and devices.</p><ul class="tags"><li>VPS localization</li><li>Digital twins</li><li>Persistent anchors</li></ul></div>
+        <div class="video-shell" data-video-url=""><div class="video-placeholder"><span class="play">▶</span><p>Video ready for your embed URL</p><small>Paste the embed URL into this panel's data-video-url value.</small></div></div>
+      </article>
+
+      <article class="capability-panel" id="panel-shared" hidden>
+        <div class="panel-copy"><span class="number">CAPABILITY 03</span><h3>Shared Spatial Experiences</h3><p>Synchronize spatially aligned content so multiple people can see, discuss, and interact with the same digital objects together. Each participant remains aligned to the same real-world coordinate system.</p><ul class="tags"><li>Shared coordinate spaces</li><li>Real-time networking</li><li>Cross-device sessions</li></ul></div>
+        <div class="video-shell" data-video-url=""><div class="video-placeholder"><span class="play">▶</span><p>Video ready for your embed URL</p><small>Paste the embed URL into this panel's data-video-url value.</small></div></div>
+      </article>
+
+      <article class="capability-panel" id="panel-robotics" hidden>
+        <div class="panel-copy"><span class="number">CAPABILITY 04</span><h3>Spatial Robotics &amp; Navigation</h3><p>Connect localized mixed-reality devices to physical machines. The VPS-powered RC car uses a mapped indoor environment, NavMesh pathfinding, and networked motor control to travel to spatial destinations.</p><ul class="tags"><li>Unity NavMesh</li><li>Raspberry Pi control</li><li>Indoor VPS positioning</li></ul></div>
+        <div class="video-shell" data-video-url=""><div class="video-placeholder"><span class="play">▶</span><p>Video ready for your embed URL</p><small>Paste the embed URL into this panel's data-video-url value.</small></div></div>
+      </article>
+
+      <article class="capability-panel" id="panel-development" hidden>
+        <div class="panel-copy"><span class="number">CAPABILITY 05</span><h3>Immersive Application Development</h3><p>Prototype and develop focused experiences for spatial platforms—from interaction design and 3D interfaces to deployment and device testing. The result is tailored to the audience, environment, and hardware.</p><ul class="tags"><li>Vision Pro</li><li>Meta Quest</li><li>Unity prototyping</li></ul></div>
+        <div class="video-shell" data-video-url=""><div class="video-placeholder"><span class="play">▶</span><p>Video ready for your embed URL</p><small>Paste the embed URL into this panel's data-video-url value.</small></div></div>
+      </article>
+    </section>
+
+    <section class="section work" id="work">
+      <div class="section-heading"><p class="eyebrow">Selected experiments</p><h2>Featured Projects</h2><p>Practical prototypes that connect physical spaces, devices, and people.</p></div>
+      <div class="project-list">
+        <article class="game-feature">
+          <div class="game-art" role="img" aria-label="Stylized time-travel VR game placeholder"><div class="time-ring"></div><div class="game-monogram">CC</div><p>OFFICIAL MEDIA COMING SOON</p></div>
+          <div class="game-copy"><span class="development-badge">In Development</span><p class="project-tag">Original VR Game · Coming Soon</p><h3>Chronological Crashers VR</h3><p>A time-travel VR action game inspired by classic arcade light-gun shooters. Move through wildly different eras, confront enemies, and uncover the plans of ChronoCorp.</p><ul><li>Original game</li><li>Unity VR</li><li>Time-travel action</li></ul><div class="coming-note">Trailer, screenshots, and release information coming soon</div></div>
+        </article>
+        <article class="project">
+          <div class="project-art" role="img" aria-label="Abstract engine object-tracking visualization"><div class="project-object"></div><span class="pin pin-a">Air Intake</span><span class="pin pin-b">Engine Cover</span><span class="pin pin-c">Oil Dipstick</span></div>
+          <div class="project-copy"><p class="project-tag">Mixed Reality · Object Tracking</p><h3>Mixed Reality Object Detection &amp; Tracking</h3><p>A car engine bay enhanced with spatially aligned labels and instructional information.</p></div>
+        </article>
+        <article class="project reverse">
+          <div class="project-copy"><p class="project-tag">Spatial Robotics · VPS</p><h3>VPS-Powered Autonomous RC Car</h3><p>A tracked vehicle that localizes inside a mapped home, plans routes around obstacles, and drives to destinations selected in Unity.</p></div>
+          <div class="project-art rover-art" role="img" aria-label="Abstract RC car navigation visualization"><div class="route"></div><div class="rover"></div></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="apps" id="apps">
+      <div class="apps-heading"><div><p class="eyebrow">Earlier &amp; smaller releases</p><h2>Independent Apps</h2></div><p>Smaller experiments and released applications that helped shape the interaction and platform work shown above.</p></div>
+      <div class="app-grid">
+        <article class="app-card"><div class="app-icon" aria-hidden="true">◷</div><div class="app-copy"><span class="status">Released</span><p class="project-tag">Apple Vision Pro</p><h3>Vision Pro Clock App</h3><p>A hand-controlled spatial clock experiment that lets people place multiple customizable clocks throughout their environment.</p><ul><li>visionOS</li><li>PolySpatial</li><li>Hand interaction</li></ul></div></article>
+        <article class="app-card"><div class="app-icon archived" aria-hidden="true">⌁</div><div class="app-copy"><span class="status discontinued">Discontinued</span><p class="project-tag">App Archive</p><h3>Earlier App</h3><p>A previously released application that is no longer actively supported, preserved here as part of the studio's development history.</p><ul><li>Archived release</li><li>No longer supported</li></ul></div></article>
+      </div>
+    </section>
+
+    <section class="about" id="about">
+      <div><p class="eyebrow">Immersive Dimensions</p><h2>Small studio.<br>Full-stack spatial prototypes.</h2></div>
+      <div class="about-copy"><p>I design and build focused experiments that test how spatial computing can solve real problems—from recognizing a car engine component to helping a robot understand a room.</p><p>The work spans experience design, Unity development, device deployment, 3D scanning, networking, and physical prototyping.</p></div>
+    </section>
+
+    <section class="contact">
+      <div><h2>Let's build something immersive.</h2><p>Have a project in mind or want to explore an idea? I'd love to hear from you.</p></div>
+      <a class="button" href="mailto:hello@immersivedimensions.com">Contact Me <span>↗</span></a>
+    </section>
+  </main>
+
+  <footer><span>© 2026 Immersive Dimensions</span><span>Spatial computing · Mixed reality · Interactive prototypes</span><a href="#top">Back to top ↑</a></footer>
+
+  <script>
+    const capabilityButtons = document.querySelectorAll(".capability-button");
+    const capabilityPanels = document.querySelectorAll(".capability-panel");
+
+    function closeAllCapabilities() {
+      capabilityButtons.forEach((button) => {
+        button.classList.remove("active");
+        button.setAttribute("aria-expanded", "false");
+        const action = button.querySelector(".card-action");
+        action.innerHTML = "Explore <b>+</b>";
+      });
+
+      capabilityPanels.forEach((panel) => {
+        panel.classList.remove("active");
+        panel.hidden = true;
+      });
+    }
+
+    capabilityButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const wasOpen = button.classList.contains("active");
+        const panel = document.getElementById(button.dataset.panel);
+
+        closeAllCapabilities();
+
+        if (!wasOpen) {
+          button.classList.add("active");
+          button.setAttribute("aria-expanded", "true");
+          button.querySelector(".card-action").innerHTML = "Close <b>−</b>";
+          panel.hidden = false;
+          panel.classList.add("active");
+        }
+      });
+    });
+
+    document.querySelectorAll(".video-shell").forEach((videoShell) => {
+      const videoUrl = videoShell.dataset.videoUrl.trim();
+
+      if (videoUrl !== "") {
+        const iframe = document.createElement("iframe");
+        iframe.src = videoUrl;
+        iframe.title = "Project video";
+        iframe.loading = "lazy";
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+        iframe.allowFullscreen = true;
+        videoShell.replaceChildren(iframe);
+      }
+    });
+  </script>
+</body>
+</html>
